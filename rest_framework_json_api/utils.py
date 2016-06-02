@@ -206,11 +206,18 @@ def get_instance_or_manager_resource_type(resource_instance_or_manager):
 
 
 def get_resource_type_from_model(model):
-    json_api_meta = getattr(model, 'JSONAPIMeta', None)
-    return getattr(
-        json_api_meta,
-        'resource_name',
-        format_resource_type(model.__name__))
+
+    def camelcase_to_underscore(name):
+        import re
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+    model_name = camelcase_to_underscore(model.__name__).replace('_', '-')
+    app_label = model._meta.app_label
+    if app_label == 'notifications':
+        app_label = 'core'
+
+    return "%s-%s" % (app_label, model_name)
 
 
 def get_resource_type_from_queryset(qs):
