@@ -415,7 +415,7 @@ class JSONRenderer(renderers.JSONRenderer):
         if resource_name == 'errors':
             return self.render_errors(data, accepted_media_type, renderer_context)
 
-        include_resources_param = request.query_params.get('include') if request else None
+        include_resources_param = request.query_params.get('include') if request and hasattr(request, 'query_params') else None
         if include_resources_param:
             included_resources = include_resources_param.split(',')
         else:
