@@ -216,8 +216,8 @@ def get_resource_type_from_model(model):
     app_label = model._meta.app_label
     if app_label == 'notifications':
         app_label = 'core'
-
-    return "%s-%s" % (app_label, model_name)
+    new_value = "%s-%s" % (app_label, model_name)
+    return inflection.pluralize(new_value)
 
 
 def get_resource_type_from_queryset(qs):
