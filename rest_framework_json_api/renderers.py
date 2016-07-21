@@ -4,6 +4,7 @@ Renderers
 import copy
 from collections import OrderedDict
 
+import inflection
 from django.utils import six, encoding
 from rest_framework import relations
 from rest_framework import renderers
@@ -237,6 +238,7 @@ class JSONRenderer(renderers.JSONRenderer):
         context = current_serializer.context
         included_serializers = utils.get_included_serializers(current_serializer)
         included_resources = copy.copy(included_resources)
+        included_resources = [inflection.underscore(value) for value in included_resources]
 
         for field_name, field in six.iteritems(fields):
             # Skip URL field
@@ -415,12 +417,6 @@ class JSONRenderer(renderers.JSONRenderer):
         if resource_name == 'errors':
             return self.render_errors(data, accepted_media_type, renderer_context)
 
-        include_resources_param = request.query_params.get('include') if request and hasattr(request, 'query_params') else None
-        if include_resources_param:
-            included_resources = include_resources_param.split(',')
-        else:
-            included_resources = list()
-
         json_api_data = data
         json_api_included = list()
         # initialize json_api_meta with pagination meta or an empty dict
@@ -432,6 +428,13 @@ class JSONRenderer(renderers.JSONRenderer):
             serializer_data = data
 
         serializer = getattr(serializer_data, 'serializer', None)
+
+        # Build a list of included resources
+        include_resources_param = request.query_params.get('include') if request and hasattr(request, 'query_params') else None
+        if include_resources_param:
+            included_resources = include_resources_param.split(',')
+        else:
+            included_resources = utils.get_default_included_resources_from_serializer(serializer)
 
         if serializer is not None:
 
