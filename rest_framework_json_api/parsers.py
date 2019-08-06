@@ -42,8 +42,10 @@ class JSONParser(parsers.JSONParser):
             field_data = field_data.get('data')
             if isinstance(field_data, dict) or field_data is None:
                 parsed_relationships[field_name] = field_data
+                if field_data:
+                    parsed_relationships[field_name] = field_data['id']
             elif isinstance(field_data, list):
-                parsed_relationships[field_name] = list(relation for relation in field_data)
+                parsed_relationships[field_name] = list(relation['id'] for relation in field_data)
         return parsed_relationships
 
     @staticmethod
